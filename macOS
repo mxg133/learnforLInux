@@ -1,0 +1,153 @@
+macOS的命令行操作
+d=dir也就是文件夹 r=read w=write x=excute，读写执行 三个一组，一共三组加上最前面表示是不是文件夹的字幕，十个字母 第一组表示所有者的权限，第二组表示所有者所在组的权限，第三组表示其他人的权限 有这个字母就是有，横线就是没有。
+
+Ls -ahl 查看文件的所有者
+cd -			返回上一个目录
+
+mkdir ios		创建目录
+mkdir “ios 1”	创建中间带空格的文件夹
+mkdir -p ./Desktop/ios/ios1 创建多级目录
+
+rm 1.c 		删除文件
+rm -r ios		删除目录(小心操作)
+rmdir dir 		dir必须是空目录
+rm -rf / 		在root下，删除所有
+
+mv 1.c 2.c 		重命名文件
+mvdir ios0 ios1 	重命名文件夹
+mv 1.c dir/ 		移动1.c到dir目录
+
+cp 1.txt 2.txt 将1.txt拷贝复制为2.txt
+cp 1.txt ios1/ 将当前目录下的1.txt拷贝到ios1
+cp -r ios1 ios2 将当前目录下的ios1全部拷贝到ios2
+
+cat -n 1.txt | more 查看1.txt(显示行号&&分页显示)
+	= 输出当前行号 
+
+less 2.txt 用于查看大型日志文件
+
+whoami	当前用户
+sudo来调用root的权限
+	/usr/local
+	sudo touch text0
+	sudo -s
+	touch text1
+	exit 请走sudo大圣
+sudo su 直接进入root用户
+
+which 命令 查看命令所在目录
+df -h 查看硬盘挂载
+
+>输出重定向
+>>追加
+> 1.txt 	可将所有内容打印到1.txt
+cat 1.txt > 2.txt	1.txt覆盖到2.txt
+echo 123 > 1.txt 	向1.txt写入内容
+echo 456 > 1.txt 	覆盖1.txt
+echo 789 >> 1.txt 	向1.txt添加内容
+echo “hello world” >> 1.txt 	向1.txt添加内容
+
+head -n 4 1.txt 查看1.txt的前4行
+
+tail -n 2 1.txt 查看1.txt的后两行
+tail -f 1.txt 查看1.txt的实时日志
+
+ln -s ../Desktop/ 1111 给Desktop目录创建一个软连接
+rm 1111 删除软连接 注意不要带/ ⚠️危险
+
+history 7 查看最后执行的7个指令
+!171 立即执行第171个指令
+history -c 删除历史指令
+
+date "+%Y-%m-%d %H:%M:%S" 时间显示
+date -s "2022-1-1 20:20:20” 修改系统时间
+
+cal 2020 显示2020年的日历
+
+find /Users/mxg/Downloads/ -name 1.txt 在该目录下是否有1.txt
+find /Users/mxg/Downlo2ds -size +100k 查找该目录下>100kde文件
+find /Users/mxg/Downloads/ *.txt 查找该目录下.txt文件
+
+gzip 1.txt 压缩1.txt 不会保留1.txt
+gunzip 1.txt.gz  解压 不会保留1.txt.gz
+
+zip -r 309.zip 209/	将290目录压缩成309.zip
+unzip -d 409/ 309.zip 将309.zip解压到409目录
+
+tar -zcvf 509.tar.gz 1.txt 2.txt 将1.txt 2.txt打包成509.tar.gz
+tar -zcvf 609.tar.gz 209/ 	将209目录打包成609.tar.gz
+tar -zxvf 509.tar.gz 将509.tar.gz解压到当前目录
+tar -zxvf 609.tar.gz -C 709/	将609.tar.gz解压到已创建好的709目录
+
+vim mcd.sh
+	mcd(){
+		mkdir -p "$1"
+		cd "$1"
+	}
+chmod +x mcd.sh 给予mcd.sh执行的权限
+source mcd.sh 激活mcd.sh脚本
+mcd dir2 达到了mcd.sh函数的效果：创建dir2目录并进入
+
+mkdir dir1
+cd $_ $_就是上一行命令的最后一个参数
+$? 上一条命令的运行结果
+
+$0 脚本名 
+$1-$9 脚本参数$1是第一个，以此类推 
+$@所有参数 
+$# 参数个数 
+$? 上一条命令的返回值 
+$$ 当前命令的pid 
+!!上一条整条命令 包括参数 
+$_上一条命令的最后一个参数
+
+!! 粘贴上一个命令 并执行
+———————————————
+more /etc/shell 看到不同风格的shell的命令
+chsh -s /bin/zsh 切换到zsh
+chsh -s /bin/bash 切换回bash
+
+defaults write com.apple.screencapture type jpg 改变截图格式
+https://blog.csdn.net/souhanben5159/article/details/87297857
+———————————————
+8、编辑文件vi(m)
+	三种模式
+		命令模式i插入 a添加
+		编辑模式 esc回到命令模式
+		底行命令模式 :wq存盘并退出
+					:set nu显示行号  
+					:set nonu取消显示
+					:q! 强行退出 不保存
+					:q 不保存退出
+
+		cat 1.c 查看里面内容
+		gcc 1.c 编译 检查语法错误
+		gcc 1.c -o xinming改名
+		gcc -E 1.c预编译指令
+		gcc -c 1.c 编译成二进制文件1.o，没有链接
+		gcc 1.o -o xinming 链接
+		./a.out 执行
+		g++ -o 1 1.cpp&&./1
+
+	vim ~/.vimrc 配置vim
+  	1 set (no)nu "注释(取消)显示行号 
+ 	2 syntax on "语法高亮
+ 	3 set cindent "C的缩紧模式
+  	4 set autoindent "自动缩进
+
+	命令模式下：
+		ndd 删除下面n行
+		nyyp 复制粘贴n遍该行
+		:关键词 查找关键词
+		gg 回到顶部
+		G 回到底部
+		u 撤销
+		n [shift]+g 跳转到n行
+	--INSERT--:
+		// 写注释
+	
+￼
+
+open /Applications/Safari.app https://www.baidu.com
+关于CleanMyMac x 4.2.1碰到打不开提示错误或闪退之类的情况，针对10.14的系统，在装好4.2.1和谐版后，运行终端输入以下命令然后回车即可：
+codesign -f -s - --deep /Applications/CleanMyMac\ X.app
