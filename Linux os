@@ -1,0 +1,186 @@
+Linux操作
+重启
+reboot
+
+updatedb
+locate 1.txt 查找1.txt
+
+cat 1.txt | grep -ni they 不区分大小写在1.txt查找they,并显示行好
+
+groupadd police	创建police组
+useradd -g police tom	在police组下创建tom用户
+id tom 查看用户所在组
+passwd tom	设置tom的密码
+ls -ahl	查看文件的所有者
+
+改变用户所在组
+usermod	-g bandit tom 将tom移入bandit组
+
+ls -l	指令详解
+drwxr-xr-x@ 7 mxg  staff     224  4 23 23:26 文件夹
+-rw-------@ 1 mxg  staff    1161  5  9 15:06 1..txt
+- - - - - - - - - - - 
+- 1  -普通文件 d目录 l软链接 c字符文件(鼠标、键盘) b:块文件(硬盘)
+- 2  3  4 表示文件所有者拥有的权限  x代表可以执行文件/进入目录
+- 4  5  6 文件所在组的用户的权限
+- 7  8  9 文件其他组的用户的权限
+- rwx 也可以用数字表示 r=4 w=2 x=1
+1	表示硬链接
+7	表示该目录的子目录数量
+1161	代表1.txt文件的大小
+224(4096)	表示是一个目录(固定值)
+5  9 15:06	表示最后修改日期
+
+修改权限-chmod (u:所有者 g:所在组 o:其他人 a:所有人)
+chomd u=rwx,g=rx,a=rw,o=rw 1.txt	将1.txt给别人/组赋予权限
+chomd u-x,g+w 2.txt	给所有者u撤掉执行的权限，给所在组加上写的权限
+chomd a+r 3.txt	给所有人3.txt读的权限
+chomd 755 4.txt	rwxr-xr-x 权限
+
+修改文件所有者-chown
+chown tom 1.txt	修改文件所有者
+chown -R tom kkk	修改目录下所有内容的所有者(root)
+chown newowner:newgroup file
+
+修改文件所在组-chgrp
+chgrp bandit 1.txt	将1.txt修改到bandit组下
+chgrp -R bandit kkk	将kkk目录转移到banfit组下
+
+
+任务调度
+crontab [选项]
+crontab  -e
+	*/1 * * * * ls-l /Users/mxg/Downloads >> /Users/mxg/Downloads/test.txt
+	(每分钟调用ls-l /Users/mxg/Downloads写在test.txt中)
+
+每隔1分钟，就将当前的日期信息，追加到mydata.txt 文件中
+vim mytask1.sh
+	date >> /Users/mxg/Downloads/mydata.txt
+chmod 744 /Users/mxg/Downloads/mytask1.sh 给 mytask1.sh 一个可以执行权限
+crontab -e 
+	*/1 * * * * Users/mxg/Downloads/mytask1.sh
+
+
+添加一块硬盘
+1)虚拟机添加硬盘(重启)
+		在【虚拟机】菜单中，选择【设置】，然后设备列表里添加硬盘，然后一	路【下一步】，中间只有选择磁盘大小的地方需要修改，至到完成。然后重启		系统(才能识别)!
+2)分区 格式化	fdisk /dev/sdb
+		说明: 开始分区后输入 n，新增分区，然后选择 p，分区类型为主分区。两	次回车默认剩余全部空间。最后输入 w 写入分区并退出，若不保存退出输入 q。
+3)格式化		mkfs -t ext4 /dev/sdb1
+4)挂载	先创建一个 /home/newdisk ,挂载 mount /dev/sdb1 /home/newdisk
+		卸载	umount /dev/sdb1(或者umount /newdisk)
+5)设置可以自动挂载(永久挂载，当你重启系统，仍然可以挂载到 /home/newdisk)
+	vim /etc/fstab
+		/dev/sdb1 /home/newdisk ext4 defaults 0 0
+	完成后 执行 mount –a 即刻生效
+
+查询系统整体磁盘使用情况 
+df -lh
+
+查询指定目录的磁盘占用情况 
+du -h /目录 
+-s 指定目录占用大小汇总 -h 带计量单位
+-a 含文件
+--max-depth=1 子目录深度
+-c 列出明细的同时，增加汇总值
+
+统计/home文件夹下文件的个数 
+ls -l /home | grep “^_” | wc -l
+
+统计/home文件夹下目录的个数 
+ls -l /home | grep “^d” | wc -l
+
+统计/home文件夹下及其子目录下的所有文件的个数 
+ls -lR /home | grep “^_” | wc -l
+
+统计/home文件夹下及其子目录下的所有目录的个数 
+ls -lR /home | grep “^d” | wc -l
+
+
+
+指定固定的ip 要求:将 ip 地址配置的静态的，ip 地址为 192.168.184.130
+vim /etc/sysconfig/network-scripts/ifcfg-eth0
+	ONBOOT=yes
+	BOOTPROTO=static（以静态方式获取ip）
+	IPADDR=192.168.184.130（指定ip）
+	GATEWAY=192.168.184.2（网关）
+	DNS1=192.168.184.2（dns和网关一致）
+修改后，一定要 重启服务	service network restart
+查看配置	ifconfig
+
+进程
+显示系统执行的进程
+	ps -aux | more
+显示当前终端的所有进程信息
+	ps -a
+以用户的格式显示进程信息
+	ps -u
+显示后台进程运行的参数
+	ps -x
+
+ps 指令详解
+比如看看有没有 sshd 服务
+	ps –aux | grep sshd
+•System V 展示风格
+•USER:用户名称
+•PID:进程号 VSZ:进程占用的虚拟内存大小(单位:KB)
+•%CPU:进程占用 CPU 的百分比 RSS:进程占用的物理内存大小(单位:KB)
+•%MEM:进程占用物理内存的百分比
+• VSZ:进程占用的虚拟内存大小(单位:KB)
+• RSS:进程占用的物理内存大小(单位:KB)
+•TT:终端名称,缩写 .
+·STAT:进程状态，其中 S-睡眠，s-表示该进程是会话的先导进程，N-表示进程拥有	比普 通优先级更低的优先级，R-正在运行，D-短期等待，Z-僵死进程，T-被跟	踪或者被停止等等
+• STARTED:进程的启动时间
+• TIME:CPU 时间，即进程使用 CPU 的总时间
+• COMMAND:启动进程所用的命令和参数，如果过长会被截断显示
+
+查看父进程-以全格式显示当前所有的进程(是BSD风格)
+	ps -ef | more
+显示所有进程
+	ps -e
+全格式
+	ps -f
+•UID：用户 ID
+•PID：进程 ID
+•PPID：父进程 ID
+•C：CPU 用于计算执行优先级的因子。数值越大，表明进程是 CPU 密集型运算，执	行优先级会降低；数值越小，表明进程是 I/O 密集型运算，执行优先级会提高
+•STIME：进程启动的时间
+•TTY：完整的终端名称
+•TIME：CPU 时间
+•CMD：启动进程所用的命令和参数
+
+查看 sshd 进程的父进程号是多少，应该怎样查询 ？
+	ps -ef | grep sshd
+
+
+终止进程kill和killall
+踢掉某个非法登录用户
+	ps -aux | grep sshd
+	kill 4010(对应的)
+
+终止远程登录服务 sshd, 在适当时候再次重启 sshd 服务 
+	ps -aux | grep sshd
+	kill 3908(最上面)
+
+终止多个 gedit 编辑器 【killall , 通过进程名称来终止进程】 
+	killall gedit
+
+强制杀掉一个终端 
+	ps -aux | grep bash
+	kill -9 4090
+
+
+查看进程树pstree 
+树状的形式显示进程的 pid 
+	pstree -p
+树状的形式进程的用户 id
+	pstree -u
+
+
+
+
+
+
+
+
+
